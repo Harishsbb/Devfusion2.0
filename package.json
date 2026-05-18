@@ -1,0 +1,12 @@
+{
+  "name": "devcollab",
+  "version": "1.0.0",
+  "description": "DevCollab - Real-time AI-powered project collaboration platform",
+  "scripts": {
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "install:all": "cd server && npm install && cd ../client && npm install",
+    "seed": "cd server && npm run seed",
+    "build": "cd client && npm run build"
+  }
+}
