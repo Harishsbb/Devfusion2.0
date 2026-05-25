@@ -65,8 +65,12 @@ app.use(errorHandler);
 setupSocket(io);
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`\n🚀 DevCollab Server running on port ${PORT}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV}`);
-  console.log(`🌐 Client URL: ${process.env.CLIENT_URL}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  server.listen(PORT, () => {
+    console.log(`\n🚀 DevCollab Server running on port ${PORT}`);
+    console.log(`📊 Environment: ${process.env.NODE_ENV}`);
+    console.log(`🌐 Client URL: ${process.env.CLIENT_URL}`);
+  });
+}
+
+module.exports = app;
