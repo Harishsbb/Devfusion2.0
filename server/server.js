@@ -40,7 +40,10 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500 });
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === 'development' ? 10000 : 500,
+});
 app.use('/api', limiter);
 
 app.set('io', io);
