@@ -2,6 +2,18 @@
 
 A modern, production-grade full-stack collaboration platform for developer teams, powered by AI.
 
+---
+
+## 📖 Project Documentation
+
+We have created comprehensive developer guides to help you understand, build, and deploy this project:
+- [🏗️ System Architecture & Database Design](docs/architecture.md): Database models, Zustand stores, and client-server flow.
+- [🔌 API & Socket.IO Reference](docs/api_reference.md): Detailed REST endpoints and WebSocket message events.
+- [🤖 AI Integration & Features](docs/ai_features.md): How AI features work, data shapes, and instructions for connecting Gemini / OpenAI APIs.
+- [🚢 Deployment & Load Balancing](docs/deployment.md): Steps to host on Vercel, Render, VPS, and configure internal Clustering or external Nginx load balancing.
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -23,6 +35,7 @@ cd ../client && npm install
 The `server/.env` is pre-configured with MongoDB Atlas. Update if needed:
 
 ```env
+PORT=5000
 MONGODB_URI=mongodb+srv://admin:harish123@cluster0.cfoj6si.mongodb.net/devcollab
 JWT_SECRET=devcollab_super_secret_jwt_key_2024_production
 CLIENT_URL=http://localhost:5173
@@ -49,41 +62,45 @@ This creates:
 
 ### 4. Start Development Servers
 
-**Terminal 1 — Backend:**
+**Terminal 1 — Backend (Select one):**
 ```bash
-cd server && npm run dev
+# Option A: Run a single-instance process (Standard)
+npm run dev:server
+
+# Option B: Run a clustered load-balanced server scaling to all CPU cores
+npm run dev:server:cluster
 ```
 
 **Terminal 2 — Frontend:**
 ```bash
-cd client && npm run dev
+npm run dev:client
 ```
 
 Visit `http://localhost:5173`
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Architecture Layout
 
 ```
 devcollab/
+├── deployment/                # Production load balancer files
+│   └── nginx.conf             # Nginx reverse proxy load balancer configuration
+├── docs/                      # Architectural & developer guides
+│   ├── architecture.md
+│   ├── api_reference.md
+│   ├── ai_features.md
+│   └── deployment.md
 ├── server/                    # Node.js + Express backend
 │   ├── src/
 │   │   ├── config/db.js       # MongoDB Atlas connection
 │   │   ├── models/            # Mongoose schemas
-│   │   │   ├── User.js
-│   │   │   ├── Workspace.js
-│   │   │   ├── Project.js
-│   │   │   ├── Task.js
-│   │   │   ├── Notification.js
-│   │   │   ├── Snippet.js
-│   │   │   └── Document.js
 │   │   ├── controllers/       # Request handlers
 │   │   ├── routes/            # Express routers
 │   │   ├── middleware/        # Auth, error handling
-│   │   ├── socket/            # Socket.IO handlers
+│   │   ├── socket/            # Socket.IO handlers (Clustering support)
 │   │   └── seed/              # Sample data seeder
-│   └── server.js              # Entry point
+│   └── server.js              # Entry point (Clustered / Sticky Sessions support)
 │
 └── client/                    # React + Vite frontend
     └── src/
@@ -92,6 +109,8 @@ devcollab/
         ├── lib/               # API client, Socket.IO, utils
         └── store/             # Zustand state management
 ```
+
+---
 
 ## 🎯 Features
 
@@ -102,6 +121,7 @@ devcollab/
 | Project Dashboard | ✅ |
 | Drag-and-drop Kanban | ✅ |
 | Real-time via Socket.IO | ✅ |
+| Horizontal Clustering & Load Balancing | ✅ |
 | AI Task Breakdown | ✅ |
 | AI Standup Generator | ✅ |
 | AI Code Review | ✅ |
@@ -113,6 +133,8 @@ devcollab/
 | Dark/Light Mode | ✅ |
 | Mobile Responsive | ✅ |
 
+---
+
 ## 🛠️ Tech Stack
 
 | Layer | Technologies |
@@ -123,23 +145,7 @@ devcollab/
 | DnD | @dnd-kit/core |
 | Backend | Node.js, Express.js |
 | Database | MongoDB Atlas + Mongoose |
-| Real-time | Socket.IO |
+| Real-time | Socket.IO + Cluster Adapter + Sticky Routing |
 | Auth | JWT + bcryptjs |
 | AI | Mock AI (swap in Gemini/OpenAI API key) |
 
-## 🤖 AI Integration
-
-The AI features use a mock implementation. To connect to a real AI API:
-
-1. Add your API key to `server/.env`:
-   ```env
-   GEMINI_API_KEY=your_key_here
-   ```
-
-2. Update `server/src/controllers/aiController.js` to use the actual API
-
-## 🚢 Deployment
-
-- **Frontend**: Deploy `client/` to Vercel
-- **Backend**: Deploy `server/` to Render
-- Update `CLIENT_URL` in server `.env` to your Vercel domain
