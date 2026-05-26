@@ -1,4 +1,8 @@
 const mongoose = require('mongoose');
+const dns = require('dns');
+
+// Force DNS resolution to use Google/Cloudflare DNS to resolve Atlas SRV records correctly on local networks
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 const connectDB = async () => {
   const uri = process.env.MONGODB_URI;
