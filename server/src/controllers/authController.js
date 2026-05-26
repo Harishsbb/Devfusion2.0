@@ -1,7 +1,14 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-const signToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE || '7d' });
+const signToken = (id) => {
+  const secret = process.env.JWT_SECRET || 'devcollab_super_secret_jwt_key_2024_production';
+  let expire = process.env.JWT_EXPIRE;
+  if (!expire || expire === 'undefined' || expire === 'null' || expire.trim() === '') {
+    expire = '7d';
+  }
+  return jwt.sign({ id }, secret, { expiresIn: expire });
+};
 
 exports.register = async (req, res, next) => {
   try {
