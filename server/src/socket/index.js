@@ -21,6 +21,9 @@ const setupSocket = (io) => {
   io.on('connection', async (socket) => {
     const userId = socket.user._id.toString();
     onlineUsers.set(userId, socket.id);
+    
+    // Join a private user-specific room for targeted messages (e.g. notifications) across the cluster
+    socket.join(`user:${userId}`);
 
     await User.findByIdAndUpdate(userId, { isOnline: true, lastSeen: new Date() });
     io.emit('user:online', { userId, user: socket.user });
@@ -68,10 +71,8 @@ const setupSocket = (io) => {
     });
 
     socket.on('notification:send', (data) => {
-      const recipientSocketId = onlineUsers.get(data.recipientId);
-      if (recipientSocketId) {
-        io.to(recipientSocketId).emit('notification:new', data.notification);
-      }
+      // Broadcast to the user-specific room across the entire cluster
+      io.to(`user:${data.recipientId}`).emit('notification:new', data.notification);
     });
 
     socket.on('presence:update', (data) => {

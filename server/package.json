@@ -5,10 +5,14 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
+    "dev:cluster": "cross-env ENABLE_CLUSTER=true nodemon server.js",
     "start": "node server.js",
+    "start:cluster": "cross-env ENABLE_CLUSTER=true node server.js",
     "seed": "node src/seed/seedData.js"
   },
   "dependencies": {
+    "@socket.io/cluster-adapter": "^0.3.0",
+    "@socket.io/sticky": "^1.0.4",
     "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
@@ -25,6 +29,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "nodemon": "^3.1.0"
   }
 }
