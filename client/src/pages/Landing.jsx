@@ -40,8 +40,8 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-gray-950 text-white overflow-x-hidden">
       {/* Navbar */}
-      <nav className="fixed top-0 inset-x-0 z-50 glass border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <nav className="fixed top-4 inset-x-4 max-w-7xl mx-auto z-50 glass border border-white/10 rounded-2xl shadow-xl backdrop-blur-xl">
+        <div className="px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center shadow-glow border border-indigo-500/30">
               <img src="/logo.png" alt="DevCollab Logo" className="w-full h-full object-cover" />
@@ -61,7 +61,7 @@ export default function Landing() {
       </nav>
 
       {/* Hero */}
-      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
+      <section ref={heroRef} className="relative min-h-screen flex flex-col items-center justify-center pt-28 pb-12 overflow-hidden">
         <div className="absolute inset-0">
           <div className="blob w-[600px] h-[600px] bg-indigo-600 -top-40 -left-20 opacity-20" />
           <div className="blob w-[500px] h-[500px] bg-purple-600 top-1/4 right-0 opacity-15 animation-delay-400" />
