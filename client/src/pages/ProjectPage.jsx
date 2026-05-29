@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Trello, FileText, Code2, Activity, Settings, ArrowLeft, CheckCircle2, Clock, Users, Zap, Plus, ExternalLink } from 'lucide-react';
+import { Trello, FileText, Code2, Activity, Settings, ArrowLeft, CheckCircle2, Clock, Users, Zap, Plus, ExternalLink, Trash2 } from 'lucide-react';
 import { projectAPI, taskAPI } from '../lib/api';
 import useWorkspaceStore from '../store/workspaceStore';
 import Avatar, { AvatarGroup } from '../components/ui/Avatar';
@@ -23,6 +23,8 @@ export default function ProjectPage() {
   const [tasks, setTasks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  
+  const deleteProjectStore = useWorkspaceStore(state => state.deleteProject);
 
   useEffect(() => {
     const init = async () => {
@@ -40,6 +42,20 @@ export default function ProjectPage() {
     };
     init();
   }, [workspaceId, projectId]);
+
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to permanently delete this project and all of its tasks? This action cannot be undone.")) {
+      try {
+        setIsLoading(true);
+        await deleteProjectStore(workspaceId, projectId);
+        toast.success("Project deleted successfully");
+        navigate(`/workspace/${workspaceId}`);
+      } catch (err) {
+        toast.error(err.message || "Failed to delete project");
+        setIsLoading(false);
+      }
+    }
+  };
 
   if (isLoading) return <div className="p-6"><DashboardSkeleton /></div>;
   if (!project) return <div className="p-6 text-center text-gray-400">Project not found</div>;
@@ -81,6 +97,9 @@ export default function ProjectPage() {
             </div>
           </div>
           <div className="flex gap-2">
+            <button onClick={handleDelete} className="px-4 py-2 border border-red-500/30 hover:border-red-500/50 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 font-medium rounded-xl text-sm transition-all flex items-center gap-2">
+              <Trash2 size={15} /> Delete Project
+            </button>
             <Link to={`/workspace/${workspaceId}/project/${projectId}/board`} className="btn-primary flex items-center gap-2 text-sm">
               <Trello size={15} /> Open Board
             </Link>
