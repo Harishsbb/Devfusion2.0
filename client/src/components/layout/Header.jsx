@@ -122,7 +122,7 @@ export default function Header({ title, subtitle }) {
             <Bell size={16} />
             {unreadCount > 0 && (
               <motion.span
-                className="absolute -top-1 -right-1 bg-indigo-500 text-white text-xs rounded-full w-4.5 h-4.5 flex items-center justify-center min-w-[18px] h-[18px] px-1"
+                className="absolute -top-1 -right-1 bg-indigo-500 text-white-fixed text-xs rounded-full w-4.5 h-4.5 flex items-center justify-center min-w-[18px] h-[18px] px-1"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
               >

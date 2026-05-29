@@ -144,7 +144,7 @@ export default function SettingsPage() {
                     onClick={() => fileInputRef.current?.click()}
                     className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-indigo-500 flex items-center justify-center shadow-lg hover:bg-indigo-600 transition-colors"
                   >
-                    <Camera size={12} className="text-white" />
+                    <Camera size={12} className="text-white-fixed" />
                   </button>
                 </div>
                 <div>
@@ -185,7 +185,7 @@ export default function SettingsPage() {
               )}
 
               <button type="submit" disabled={isSaving} className="btn-primary flex items-center gap-2">
-                {isSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={15} />}
+                {isSaving ? <div className="w-4 h-4 border-2 border-white-fixed/30 border-t-white-fixed rounded-full animate-spin" /> : <Save size={15} />}
                 Save Changes
               </button>
             </form>
@@ -207,7 +207,7 @@ export default function SettingsPage() {
                 <input type="password" value={passwordForm.confirmPassword} onChange={e => setPasswordForm(p => ({ ...p, confirmPassword: e.target.value }))} className="input-field" required />
               </div>
               <button type="submit" disabled={isSaving} className="btn-primary flex items-center gap-2">
-                {isSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Lock size={15} />}
+                {isSaving ? <div className="w-4 h-4 border-2 border-white-fixed/30 border-t-white-fixed rounded-full animate-spin" /> : <Lock size={15} />}
                 Change Password
               </button>
             </form>
@@ -230,7 +230,7 @@ export default function SettingsPage() {
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" defaultChecked className="sr-only peer" />
-                    <div className="w-10 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-500" />
+                    <div className="w-10 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-5 peer-checked:after:border-white-fixed after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white-fixed after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-500" />
                   </label>
                 </div>
               ))}
@@ -278,7 +278,7 @@ export default function SettingsPage() {
                         type="button"
                         onClick={() => handleAccentChange(color)}
                         className={`w-10 h-10 rounded-full border-4 transition-all ${
-                          isSelected ? 'border-white scale-110 shadow-lg' : 'border-transparent hover:scale-105'
+                          isSelected ? 'border-white-fixed scale-110 shadow-lg' : 'border-transparent hover:scale-105'
                         }`}
                         style={{ background: color }}
                       />

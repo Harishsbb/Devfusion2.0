@@ -20,7 +20,7 @@ const StatCard = ({ icon: Icon, label, value, sub, color, delay }) => (
   >
     <div className="flex items-start justify-between mb-4">
       <div className={`w-11 h-11 rounded-xl ${color} flex items-center justify-center shadow-lg`}>
-        <Icon size={20} className="text-white" />
+        <Icon size={20} className="text-white-fixed" />
       </div>
       <TrendingUp size={14} className="text-green-400" />
     </div>
@@ -185,7 +185,7 @@ export default function Dashboard() {
               <Link key={ws._id} to={`/workspace/${ws._id}`}>
                 <div className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border cursor-pointer transition-all ${currentWorkspace?._id === ws._id ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300' : 'glass-dark border-white/5 text-gray-400 hover:border-white/20 hover:text-white'}`}>
                   <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: ws.color || '#6366f1' }}>
-                    <Users size={12} className="text-white" />
+                    <Users size={12} className="text-white-fixed" />
                   </div>
                   <span className="text-sm font-medium">{ws.name}</span>
                   <span className="text-xs opacity-60">{ws.members?.length}</span>

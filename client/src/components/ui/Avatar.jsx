@@ -15,7 +15,7 @@ export default function Avatar({ user, size = 'md', className, showOnline = fals
           className={cn('rounded-full object-cover ring-2 ring-white/10', sizeClass)}
         />
       ) : (
-        <div className={cn('rounded-full bg-gradient-to-br flex items-center justify-center font-semibold text-white ring-2 ring-white/10', sizeClass, gradientClass)}>
+        <div className={cn('rounded-full bg-gradient-to-br flex items-center justify-center font-semibold text-white-fixed ring-2 ring-white/10', sizeClass, gradientClass)}>
           {getInitials(user?.name)}
         </div>
       )}

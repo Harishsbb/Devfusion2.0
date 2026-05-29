@@ -44,7 +44,7 @@ export default function Register() {
         <div className="relative z-10 max-w-md">
           <div className="flex items-center gap-3 mb-10">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-glow">
-              <Zap size={22} className="text-white" />
+              <Zap size={22} className="text-white-fixed" />
             </div>
             <span className="text-2xl font-black gradient-text">DevCollab</span>
           </div>
@@ -80,7 +80,7 @@ export default function Register() {
         >
           <div className="flex items-center gap-2 mb-8 lg:hidden">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <Zap size={16} className="text-white" />
+              <Zap size={16} className="text-white-fixed" />
             </div>
             <span className="font-bold text-xl gradient-text">DevCollab</span>
           </div>

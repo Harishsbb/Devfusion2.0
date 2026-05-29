@@ -41,7 +41,7 @@ export default function Login() {
             animate={{ y: [0, -10, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
           >
-            <Zap size={36} className="text-white" />
+            <Zap size={36} className="text-white-fixed" />
           </motion.div>
           <h2 className="text-4xl font-black text-white mb-4">Welcome back to DevCollab</h2>
           <p className="text-gray-400 text-lg leading-relaxed">The AI-powered collaboration platform for developer teams</p>
@@ -67,7 +67,7 @@ export default function Login() {
         >
           <div className="flex items-center gap-2 mb-8 lg:hidden">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <Zap size={16} className="text-white" />
+              <Zap size={16} className="text-white-fixed" />
             </div>
             <span className="font-bold text-xl gradient-text">DevCollab</span>
           </div>

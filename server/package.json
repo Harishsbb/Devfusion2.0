@@ -11,6 +11,7 @@
     "seed": "node src/seed/seedData.js"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@socket.io/cluster-adapter": "^0.3.0",
     "@socket.io/sticky": "^1.0.4",
     "bcryptjs": "^2.4.3",

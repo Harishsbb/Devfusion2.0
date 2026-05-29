@@ -72,7 +72,7 @@ export default function WorkspacePage() {
       <motion.div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-glow" style={{ background: workspace?.color || '#6366f1' }}>
-            <Users size={22} className="text-white" />
+            <Users size={22} className="text-white-fixed" />
           </div>
           <div>
             <h1 className="text-2xl font-black text-white">{workspace?.name}</h1>
@@ -254,7 +254,7 @@ export default function WorkspacePage() {
             <label className="block text-sm font-medium text-gray-300 mb-1.5">Color</label>
             <div className="flex gap-2">
               {['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899'].map(c => (
-                <button key={c} type="button" onClick={() => setProjectForm(p => ({ ...p, color: c }))} className={`w-8 h-8 rounded-lg border-2 transition-all ${projectForm.color === c ? 'border-white scale-110' : 'border-transparent'}`} style={{ background: c }} />
+                <button key={c} type="button" onClick={() => setProjectForm(p => ({ ...p, color: c }))} className={`w-8 h-8 rounded-lg border-2 transition-all ${projectForm.color === c ? 'border-white-fixed scale-110' : 'border-transparent'}`} style={{ background: c }} />
               ))}
             </div>
           </div>

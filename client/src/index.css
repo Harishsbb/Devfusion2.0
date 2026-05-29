@@ -3,6 +3,36 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --white-rgb: 15, 23, 42;
+    --gray-50-rgb: 2, 6, 23;
+    --gray-100-rgb: 15, 23, 42;
+    --gray-200-rgb: 30, 41, 59;
+    --gray-300-rgb: 51, 65, 85;
+    --gray-400-rgb: 71, 85, 105;
+    --gray-500-rgb: 100, 116, 139;
+    --gray-600-rgb: 203, 213, 225;
+    --gray-700-rgb: 226, 232, 240;
+    --gray-800-rgb: 241, 245, 249;
+    --gray-900-rgb: 255, 255, 255;
+    --gray-950-rgb: 248, 250, 252;
+  }
+
+  .dark {
+    --white-rgb: 255, 255, 255;
+    --gray-50-rgb: 249, 250, 251;
+    --gray-100-rgb: 243, 244, 246;
+    --gray-200-rgb: 229, 231, 235;
+    --gray-300-rgb: 209, 213, 219;
+    --gray-400-rgb: 156, 163, 175;
+    --gray-500-rgb: 107, 114, 128;
+    --gray-600-rgb: 75, 85, 99;
+    --gray-700-rgb: 42, 42, 64;
+    --gray-800-rgb: 26, 26, 46;
+    --gray-900-rgb: 15, 15, 26;
+    --gray-950-rgb: 7, 7, 15;
+  }
+
   * { box-sizing: border-box; }
   body {
     @apply bg-gray-950 text-gray-100 font-sans;
@@ -44,7 +74,7 @@
     @apply transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5;
   }
   .btn-primary {
-    @apply bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 hover:shadow-glow active:scale-95;
+    @apply bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white-fixed font-medium px-4 py-2 rounded-lg transition-all duration-200 hover:shadow-glow active:scale-95;
   }
   .btn-secondary {
     @apply bg-white/10 hover:bg-white/20 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 border border-white/10 hover:border-white/20 active:scale-95;

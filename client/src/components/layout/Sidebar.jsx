@@ -38,7 +38,7 @@ const NavItem = ({ to, icon: Icon, label, badge, isCollapsed }) => {
           )}
         </AnimatePresence>
         {badge && !isCollapsed && (
-          <span className="ml-auto bg-indigo-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+          <span className="ml-auto bg-indigo-500 text-white-fixed text-xs rounded-full w-5 h-5 flex items-center justify-center">
             {badge}
           </span>
         )}
@@ -99,7 +99,7 @@ export default function Sidebar({ notificationCount = 0 }) {
           >
             <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
               style={{ background: currentWorkspace.color || '#6366f1' }}>
-              <Users size={13} className="text-white" />
+              <Users size={13} className="text-white-fixed" />
             </div>
             <div className="flex-1 text-left min-w-0">
               <p className="text-sm font-medium text-gray-200 truncate">{currentWorkspace.name}</p>
@@ -122,7 +122,7 @@ export default function Sidebar({ notificationCount = 0 }) {
                     className={cn('w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors', ws._id === currentWorkspace._id ? 'bg-indigo-500/20 text-indigo-300' : 'hover:bg-white/5 text-gray-400')}
                   >
                     <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0" style={{ background: ws.color || '#6366f1' }}>
-                      <Users size={10} className="text-white" />
+                      <Users size={10} className="text-white-fixed" />
                     </div>
                     <span className="truncate">{ws.name}</span>
                   </button>
