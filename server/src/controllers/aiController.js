@@ -174,8 +174,42 @@ exports.chat = async (req, res, next) => {
     const { message } = req.body;
     if (!message) return res.status(400).json({ success: false, message: 'Message is required' });
 
-    const prompt = `The user says: "${message}"
-Respond as an expert software project management AI assistant.
+    const userName = req.user ? req.user.name : 'Developer';
+    
+    // Fetch projects the user is a member of
+    const userProjects = await Project.find({ members: req.user._id });
+    const projectIds = userProjects.map(p => p._id);
+    
+    // Fetch all tasks associated with those projects
+    const userTasks = await Task.find({ 
+      project: { $in: projectIds } 
+    }).populate('assignee', 'name');
+
+    const context = {
+      user: { name: userName, email: req.user.email },
+      projects: userProjects.map(p => ({ id: p._id, name: p.name, description: p.description })),
+      tasks: userTasks.map(t => ({
+        title: t.title,
+        status: t.status,
+        priority: t.priority,
+        projectName: userProjects.find(p => p._id.toString() === t.project.toString())?.name || 'Unknown',
+        assignee: t.assignee ? t.assignee.name : 'Unassigned'
+      }))
+    };
+
+    const prompt = `You are the expert project management AI assistant for DevCollab.
+You have access to the user's workspace profile, projects, and tasks:
+Current User: Name: ${context.user.name}, Email: ${context.user.email}
+
+Active Projects User is Member of:
+${JSON.stringify(context.projects, null, 2)}
+
+Tasks in these Projects:
+${JSON.stringify(context.tasks, null, 2)}
+
+User says: "${message}"
+
+Respond directly to the user's query. You can answer questions about their name, their projects, tasks, workloads, standups, or project management guidance.
 
 Return your response in the following JSON format:
 {
