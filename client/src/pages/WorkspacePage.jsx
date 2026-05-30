@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, FolderKanban, Users, BarChart3, Settings, Search, Grid, List, Clock, CheckCircle2 } from 'lucide-react';
+import { Plus, FolderKanban, Users, BarChart3, Settings, Search, Grid, List, Clock, CheckCircle2, Trash2 } from 'lucide-react';
 import useWorkspaceStore from '../store/workspaceStore';
+import useAuthStore from '../store/authStore';
 import { workspaceAPI } from '../lib/api';
 import Modal from '../components/ui/Modal';
 import Avatar, { AvatarGroup } from '../components/ui/Avatar';
@@ -15,6 +16,7 @@ import { joinWorkspace } from '../lib/socket';
 export default function WorkspacePage() {
   const { workspaceId } = useParams();
   const { projects, fetchProjects, createProject, currentWorkspace, workspaces, setCurrentWorkspace } = useWorkspaceStore();
+  const { user } = useAuthStore();
   const [workspace, setWorkspace] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -57,8 +59,23 @@ export default function WorkspacePage() {
       await workspaceAPI.inviteMember(workspaceId, inviteForm);
       setShowInvite(false);
       toast.success('Member invited!');
+      const data = await workspaceAPI.get(workspaceId);
+      setWorkspace(data.workspace);
     } catch (error) {
       toast.error(error.message);
+    }
+  };
+
+  const handleRemoveMember = async (userId) => {
+    if (!window.confirm("Are you sure you want to remove this member from the workspace?")) return;
+    try {
+      await workspaceAPI.removeMember(workspaceId, userId);
+      const data = await workspaceAPI.get(workspaceId);
+      setWorkspace(data.workspace);
+      setCurrentWorkspace(data.workspace);
+      toast.success('Member removed from workspace');
+    } catch (error) {
+      toast.error(error.message || 'Failed to remove member');
     }
   };
 
@@ -120,20 +137,36 @@ export default function WorkspacePage() {
             </span>
           </div>
           <div className="flex flex-wrap gap-3">
-            {workspace.members.map(m => (
-              <div key={m.user._id} className="flex items-center gap-2.5 px-3 py-2 glass rounded-xl border border-white/5">
-                <Avatar user={m.user} size="xs" showOnline={m.status !== 'pending'} />
-                <div>
-                  <p className="text-sm font-medium text-gray-200">{m.user.name}</p>
-                  <p className="text-xs text-gray-500 capitalize flex items-center gap-1.5">
-                    {m.role}
-                    {m.status === 'pending' && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 font-medium font-mono uppercase">Pending</span>
-                    )}
-                  </p>
+            {workspace.members.map(m => {
+              const currentUserMember = workspace.members.find(member => member.user._id === user?._id);
+              const isOwnerOrAdmin = currentUserMember && ['owner', 'admin'].includes(currentUserMember.role);
+              const showDelete = isOwnerOrAdmin && m.user._id !== user?._id && m.role !== 'owner';
+              return (
+                <div key={m.user._id} className="flex items-center justify-between gap-2.5 px-3 py-2 glass rounded-xl border border-white/5 min-w-[200px]">
+                  <div className="flex items-center gap-2.5">
+                    <Avatar user={m.user} size="xs" showOnline={m.status !== 'pending'} />
+                    <div>
+                      <p className="text-sm font-medium text-gray-200">{m.user.name}</p>
+                      <p className="text-xs text-gray-500 capitalize flex items-center gap-1.5">
+                        {m.role}
+                        {m.status === 'pending' && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 font-medium font-mono uppercase">Pending</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  {showDelete && (
+                    <button
+                      onClick={() => handleRemoveMember(m.user._id)}
+                      className="p-1 text-gray-500 hover:text-red-400 hover:bg-white/5 rounded-lg transition-all ml-2"
+                      title="Remove Member"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
