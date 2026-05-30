@@ -7,16 +7,30 @@ exports.createTask = async (req, res, next) => {
     const { title, description, status, priority, assignee, dueDate, labels, estimatedHours } = req.body;
     const project = await Project.findById(req.params.projectId);
     if (!project) return res.status(404).json({ success: false, message: 'Project not found' });
-    const task = await Task.create({
-      title, description, status, priority, assignee, dueDate, labels, estimatedHours,
+    
+    const taskData = {
+      title,
+      description,
+      status,
+      priority,
+      labels,
+      estimatedHours,
       project: project._id,
       workspace: project.workspace,
       reporter: req.user._id,
-    });
+    };
+    if (assignee && assignee.trim() !== '') {
+      taskData.assignee = assignee;
+    }
+    if (dueDate && dueDate.trim() !== '') {
+      taskData.dueDate = dueDate;
+    }
+
+    const task = await Task.create(taskData);
     await task.populate(['assignee', 'reporter'].map(f => ({ path: f, select: 'name email avatar' })));
-    if (assignee && assignee !== req.user._id.toString()) {
+    if (task.assignee && task.assignee.toString() !== req.user._id.toString()) {
       await Notification.create({
-        recipient: assignee,
+        recipient: task.assignee,
         sender: req.user._id,
         type: 'task_assigned',
         title: 'New task assigned',
@@ -73,6 +87,11 @@ exports.updateTask = async (req, res, next) => {
       req.body.completedAt = new Date();
       await Project.findByIdAndUpdate(oldTask.project, { $inc: { completedTaskCount: 1 } });
     }
+    
+    // Clean empty strings to null to avoid CastError
+    if (req.body.assignee === '') req.body.assignee = null;
+    if (req.body.dueDate === '') req.body.dueDate = null;
+
     const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true })
       .populate('assignee', 'name email avatar')
       .populate('reporter', 'name email avatar');

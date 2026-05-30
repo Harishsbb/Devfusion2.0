@@ -197,7 +197,11 @@ export default function KanbanPage() {
     e.preventDefault();
     try {
       const labels = taskForm.labels ? taskForm.labels.split(',').map(l => l.trim()).filter(Boolean) : [];
-      const data = await taskAPI.create(workspaceId, projectId, { ...taskForm, labels });
+      const payload = { ...taskForm, labels };
+      if (!payload.assignee) delete payload.assignee;
+      if (!payload.dueDate) delete payload.dueDate;
+      
+      const data = await taskAPI.create(workspaceId, projectId, payload);
       setTasks(prev => [...prev, data.task]);
       setShowCreateModal(false);
       setTaskForm({ title: '', description: '', priority: 'medium', assignee: '', dueDate: '', labels: '', status: 'todo' });
