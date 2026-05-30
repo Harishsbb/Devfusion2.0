@@ -67,6 +67,7 @@ if (enableCluster && isPrimary) {
   const meetingRoutes = require('./src/routes/meetingRoutes');
 
   const app = express();
+  app.set('trust proxy', 1); // Trust the first proxy/load balancer (e.g. Render/Vercel)
   const server = http.createServer(app);
 
   const io = new Server(server, {
