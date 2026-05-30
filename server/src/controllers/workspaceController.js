@@ -130,11 +130,33 @@ exports.getWorkspaceStats = async (req, res, next) => {
     const Task = require('../models/Task');
     const workspace = await Workspace.findById(req.params.id);
     if (!workspace) return res.status(404).json({ success: false, message: 'Workspace not found' });
+    
+    // Fetch only projects the user has access to
+    const projects = await Project.find({
+      workspace: workspace._id,
+      $or: [{ owner: req.user._id }, { 'members.user': req.user._id }]
+    }).select('_id');
+    const projectIds = projects.map(p => p._id);
+
     const [totalProjects, activeProjects, totalTasks, completedTasks] = await Promise.all([
-      Project.countDocuments({ workspace: workspace._id }),
-      Project.countDocuments({ workspace: workspace._id, status: 'active' }),
-      Task.countDocuments({ workspace: workspace._id }),
-      Task.countDocuments({ workspace: workspace._id, status: 'done' }),
+      Project.countDocuments({ 
+        workspace: workspace._id,
+        $or: [{ owner: req.user._id }, { 'members.user': req.user._id }]
+      }),
+      Project.countDocuments({ 
+        workspace: workspace._id, 
+        status: 'active',
+        $or: [{ owner: req.user._id }, { 'members.user': req.user._id }]
+      }),
+      Task.countDocuments({ 
+        workspace: workspace._id,
+        project: { $in: projectIds }
+      }),
+      Task.countDocuments({ 
+        workspace: workspace._id,
+        status: 'done',
+        project: { $in: projectIds }
+      }),
     ]);
     res.json({
       success: true,
