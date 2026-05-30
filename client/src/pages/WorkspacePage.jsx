@@ -25,6 +25,7 @@ export default function WorkspacePage() {
   const [showInvite, setShowInvite] = useState(false);
   const [projectForm, setProjectForm] = useState({ name: '', description: '', emoji: '🚀', color: '#6366f1', priority: 'medium', dueDate: '' });
   const [inviteForm, setInviteForm] = useState({ email: '', role: 'member' });
+  const [memberToRemove, setMemberToRemove] = useState(null);
 
   useEffect(() => {
     const init = async () => {
@@ -66,13 +67,14 @@ export default function WorkspacePage() {
     }
   };
 
-  const handleRemoveMember = async (userId) => {
-    if (!window.confirm("Are you sure you want to remove this member from the workspace?")) return;
+  const confirmRemoveMember = async () => {
+    if (!memberToRemove) return;
     try {
-      await workspaceAPI.removeMember(workspaceId, userId);
+      await workspaceAPI.removeMember(workspaceId, memberToRemove._id);
       const data = await workspaceAPI.get(workspaceId);
       setWorkspace(data.workspace);
       setCurrentWorkspace(data.workspace);
+      setMemberToRemove(null);
       toast.success('Member removed from workspace');
     } catch (error) {
       toast.error(error.message || 'Failed to remove member');
@@ -157,7 +159,7 @@ export default function WorkspacePage() {
                   </div>
                   {showDelete && (
                     <button
-                      onClick={() => handleRemoveMember(m.user._id)}
+                      onClick={() => setMemberToRemove(m.user)}
                       className="p-1 text-gray-500 hover:text-red-400 hover:bg-white/5 rounded-lg transition-all ml-2"
                       title="Remove Member"
                     >
@@ -326,6 +328,29 @@ export default function WorkspacePage() {
             <button type="submit" className="btn-primary flex-1">Send Invite</button>
           </div>
         </form>
+      </Modal>
+
+      {/* Remove Member Confirmation Modal */}
+      <Modal isOpen={!!memberToRemove} onClose={() => setMemberToRemove(null)} title="Remove Workspace Member" size="sm">
+        <div className="space-y-4">
+          <div className="p-3.5 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
+            <span className="text-lg leading-none mt-0.5">⚠️</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-red-200">Warning</p>
+              <p className="text-xs text-red-300/80 leading-relaxed mt-1">
+                Are you sure you want to remove <span className="font-semibold text-white">{memberToRemove?.name}</span> from the workspace? They will also be removed from any projects and unassigned from all tasks.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <button onClick={() => setMemberToRemove(null)} className="btn-secondary flex-1 text-sm py-2">
+              Cancel
+            </button>
+            <button onClick={confirmRemoveMember} className="btn-primary bg-red-600 hover:bg-red-700 text-white font-medium flex-1 rounded-xl text-sm py-2 transition-colors border border-red-500/30">
+              Remove
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
