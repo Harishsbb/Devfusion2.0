@@ -118,6 +118,7 @@ if (enableCluster && isPrimary) {
   app.get('/api/health', (req, res) => {
     res.json({
       status: 'OK',
+      version: '1.0.1-fix-missing-schemas',
       timestamp: new Date().toISOString(),
       env: process.env.NODE_ENV,
       cluster: enableCluster ? { workerId: cluster.worker.id, pid: process.pid } : 'disabled',
