@@ -2,6 +2,9 @@ const Meeting = require('../models/Meeting');
 const Notification = require('../models/Notification');
 const Workspace = require('../models/Workspace');
 const User = require('../models/User');
+const Project = require('../models/Project');
+const Task = require('../models/Task');
+
 
 // Helper: send notification + socket event to a user
 const sendNotification = async (io, { recipient, sender, type, title, message, link, metadata }) => {
@@ -462,9 +465,6 @@ exports.convertToTasks = async (req, res, next) => {
     const { items, projectId } = req.body;
     const meeting = await Meeting.findById(req.params.id);
     if (!meeting) return res.status(404).json({ success: false, message: 'Meeting not found' });
-
-    const Task = require('../models/Task');
-    const Project = require('../models/Project');
 
     if (!projectId) return res.status(400).json({ success: false, message: 'Project ID required' });
 
