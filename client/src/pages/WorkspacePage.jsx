@@ -333,12 +333,12 @@ export default function WorkspacePage() {
       {/* Remove Member Confirmation Modal */}
       <Modal isOpen={!!memberToRemove} onClose={() => setMemberToRemove(null)} title="Remove Workspace Member" size="sm">
         <div className="space-y-4">
-          <div className="p-3.5 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
+          <div className="p-3.5 bg-red-50 dark:bg-red-500/10 border border-red-200/60 dark:border-red-500/20 rounded-xl flex items-start gap-3">
             <span className="text-lg leading-none mt-0.5">⚠️</span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-red-200">Warning</p>
-              <p className="text-xs text-red-300/80 leading-relaxed mt-1">
-                Are you sure you want to remove <span className="font-semibold text-white">{memberToRemove?.name}</span> from the workspace? They will also be removed from any projects and unassigned from all tasks.
+              <p className="text-sm font-semibold text-red-800 dark:text-red-200">Warning</p>
+              <p className="text-xs text-red-700 dark:text-red-300/90 leading-relaxed mt-1">
+                Are you sure you want to remove <span className="font-semibold text-gray-900 dark:text-white">{memberToRemove?.name}</span> from the workspace? They will also be removed from any projects and unassigned from all tasks.
               </p>
             </div>
           </div>
