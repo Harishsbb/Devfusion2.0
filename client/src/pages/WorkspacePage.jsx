@@ -114,15 +114,23 @@ export default function WorkspacePage() {
         <div className="glass-dark rounded-2xl p-5 border border-white/[0.06]">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-white">Team Members</h3>
-            <span className="text-xs text-gray-500">{workspace.members.length} members</span>
+            <span className="text-xs text-gray-500">
+              {workspace.members.filter(m => m.status === 'active' || !m.status).length} active
+              {workspace.members.some(m => m.status === 'pending') && ` (${workspace.members.filter(m => m.status === 'pending').length} pending)`}
+            </span>
           </div>
           <div className="flex flex-wrap gap-3">
             {workspace.members.map(m => (
               <div key={m.user._id} className="flex items-center gap-2.5 px-3 py-2 glass rounded-xl border border-white/5">
-                <Avatar user={m.user} size="xs" showOnline />
+                <Avatar user={m.user} size="xs" showOnline={m.status !== 'pending'} />
                 <div>
                   <p className="text-sm font-medium text-gray-200">{m.user.name}</p>
-                  <p className="text-xs text-gray-500 capitalize">{m.role}</p>
+                  <p className="text-xs text-gray-500 capitalize flex items-center gap-1.5">
+                    {m.role}
+                    {m.status === 'pending' && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 font-medium font-mono uppercase">Pending</span>
+                    )}
+                  </p>
                 </div>
               </div>
             ))}

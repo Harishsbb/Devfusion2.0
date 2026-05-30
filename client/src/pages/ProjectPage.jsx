@@ -241,7 +241,7 @@ export default function ProjectPage() {
             Select members from the workspace to assign them to this project.
           </p>
           <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-            {workspace?.members?.map(wsMember => {
+            {workspace?.members?.filter(m => m.status === 'active' || !m.status)?.map(wsMember => {
               const projectMember = project.members?.find(m => m.user._id === wsMember.user._id);
               const isAssigned = !!projectMember;
               
