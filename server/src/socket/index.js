@@ -83,6 +83,84 @@ const setupSocket = (io) => {
       });
     });
 
+    // Meeting room events
+    socket.on('meeting:join-room', (meetingId) => {
+      socket.join(`meeting:${meetingId}`);
+      socket.to(`meeting:${meetingId}`).emit('meeting:user-joined', {
+        user: { _id: socket.user._id, name: socket.user.name, avatar: socket.user.avatar },
+      });
+    });
+
+    socket.on('meeting:leave-room', (meetingId) => {
+      socket.leave(`meeting:${meetingId}`);
+      socket.to(`meeting:${meetingId}`).emit('meeting:user-left', {
+        userId: socket.user._id,
+        name: socket.user.name,
+      });
+    });
+
+    socket.on('meeting:media-state', (data) => {
+      socket.to(`meeting:${data.meetingId}`).emit('meeting:media-update', {
+        userId: socket.user._id,
+        isMuted: data.isMuted,
+        isCameraOff: data.isCameraOff,
+        isScreenSharing: data.isScreenSharing,
+      });
+    });
+
+    socket.on('meeting:hand-raise', (data) => {
+      socket.to(`meeting:${data.meetingId}`).emit('meeting:hand-raised', {
+        userId: socket.user._id,
+        name: socket.user.name,
+        raised: data.raised,
+      });
+    });
+
+    socket.on('meeting:recording-start', (data) => {
+      socket.to(`meeting:${data.meetingId}`).emit('meeting:recording-started', {
+        startedBy: socket.user.name,
+      });
+    });
+
+    socket.on('meeting:recording-stop', (data) => {
+      socket.to(`meeting:${data.meetingId}`).emit('meeting:recording-stopped', {
+        stoppedBy: socket.user.name,
+      });
+    });
+
+    socket.on('meeting:chat-message', (data) => {
+      socket.to(`meeting:${data.meetingId}`).emit('meeting:message', data.message);
+    });
+
+    // WebRTC signaling — route directly to the target user's private room
+    socket.on('meeting:webrtc-new-peer', ({ meetingId }) => {
+      // Tell all existing participants in the room to send this new user an offer
+      socket.to(`meeting:${meetingId}`).emit('meeting:webrtc-new-peer', {
+        userId: socket.user._id.toString(),
+      });
+    });
+
+    socket.on('meeting:webrtc-offer', ({ to, offer }) => {
+      io.to(`user:${to}`).emit('meeting:webrtc-offer', {
+        from: socket.user._id.toString(),
+        offer,
+      });
+    });
+
+    socket.on('meeting:webrtc-answer', ({ to, answer }) => {
+      io.to(`user:${to}`).emit('meeting:webrtc-answer', {
+        from: socket.user._id.toString(),
+        answer,
+      });
+    });
+
+    socket.on('meeting:webrtc-ice', ({ to, candidate }) => {
+      io.to(`user:${to}`).emit('meeting:webrtc-ice', {
+        from: socket.user._id.toString(),
+        candidate,
+      });
+    });
+
     socket.on('disconnect', async () => {
       onlineUsers.delete(userId);
       await User.findByIdAndUpdate(userId, { isOnline: false, lastSeen: new Date() });

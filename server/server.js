@@ -64,6 +64,7 @@ if (enableCluster && isPrimary) {
   const snippetRoutes = require('./src/routes/snippetRoutes');
   const aiRoutes = require('./src/routes/aiRoutes');
   const analyticsRoutes = require('./src/routes/analyticsRoutes');
+  const meetingRoutes = require('./src/routes/meetingRoutes');
 
   const app = express();
   const server = http.createServer(app);
@@ -112,6 +113,7 @@ if (enableCluster && isPrimary) {
   app.use('/api/notifications', notificationRoutes);
   app.use('/api/ai', aiRoutes);
   app.use('/api/analytics', analyticsRoutes);
+  app.use('/api/workspaces/:workspaceId/meetings', meetingRoutes);
 
   app.get('/api/health', (req, res) => {
     res.json({

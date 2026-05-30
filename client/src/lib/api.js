@@ -104,4 +104,23 @@ export const analyticsAPI = {
   getContributions: (workspaceId) => api.get(`/analytics/${workspaceId}/contributions`),
 };
 
+export const meetingAPI = {
+  getAll: (workspaceId, params) => api.get(`/workspaces/${workspaceId}/meetings`, { params }),
+  getStats: (workspaceId) => api.get(`/workspaces/${workspaceId}/meetings/stats`),
+  get: (workspaceId, id) => api.get(`/workspaces/${workspaceId}/meetings/${id}`),
+  getByMeetingId: (workspaceId, meetingId) => api.get(`/workspaces/${workspaceId}/meetings/join/${meetingId}`),
+  create: (workspaceId, data) => api.post(`/workspaces/${workspaceId}/meetings`, data),
+  update: (workspaceId, id, data) => api.put(`/workspaces/${workspaceId}/meetings/${id}`, data),
+  delete: (workspaceId, id) => api.delete(`/workspaces/${workspaceId}/meetings/${id}`),
+  join: (workspaceId, id) => api.post(`/workspaces/${workspaceId}/meetings/${id}/join`),
+  leave: (workspaceId, id) => api.post(`/workspaces/${workspaceId}/meetings/${id}/leave`),
+  end: (workspaceId, id) => api.post(`/workspaces/${workspaceId}/meetings/${id}/end`),
+  sendChat: (workspaceId, id, data) => api.post(`/workspaces/${workspaceId}/meetings/${id}/chat`, data),
+  reactToMessage: (workspaceId, id, messageId, data) => api.put(`/workspaces/${workspaceId}/meetings/${id}/chat/${messageId}/react`, data),
+  pinMessage: (workspaceId, id, messageId) => api.put(`/workspaces/${workspaceId}/meetings/${id}/chat/${messageId}/pin`),
+  generateAISummary: (workspaceId, id) => api.post(`/workspaces/${workspaceId}/meetings/${id}/ai-summary`),
+  convertToTasks: (workspaceId, id, data) => api.post(`/workspaces/${workspaceId}/meetings/${id}/convert-tasks`, data),
+  invite: (workspaceId, id, data) => api.post(`/workspaces/${workspaceId}/meetings/${id}/invite`, data),
+};
+
 export default api;

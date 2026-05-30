@@ -17,6 +17,8 @@ const DocumentsPage = lazy(() => import('./pages/DocumentsPage'));
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
 const AIPage = lazy(() => import('./pages/AIPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const MeetingsPage = lazy(() => import('./pages/MeetingsPage'));
+const MeetingRoomPage = lazy(() => import('./pages/MeetingRoomPage'));
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuthStore();
@@ -51,6 +53,8 @@ export default function App() {
           <Route path="workspace/:workspaceId/snippets" element={<SnippetsPage />} />
           <Route path="workspace/:workspaceId/analytics" element={<AnalyticsPage />} />
           <Route path="workspace/:workspaceId/ai" element={<AIPage />} />
+          <Route path="workspace/:workspaceId/meetings" element={<MeetingsPage />} />
+          <Route path="workspace/:workspaceId/meetings/:meetingId" element={<MeetingRoomPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -15,6 +15,7 @@ const pageTitles = {
 export default function AppLayout() {
   const { fetchWorkspaces } = useWorkspaceStore();
   const location = useLocation();
+  const isMeetingRoom = /\/meetings\/[^/]+$/.test(location.pathname);
 
   useEffect(() => {
     fetchWorkspaces();
@@ -32,6 +33,20 @@ export default function AppLayout() {
 
   const pathInfo = Object.entries(pageTitles).find(([path]) => location.pathname === path);
   const { title = 'DevCollab', subtitle = '' } = pathInfo?.[1] || {};
+
+  if (isMeetingRoom) {
+    return (
+      <motion.div
+        key={location.pathname}
+        className="h-screen"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2 }}
+      >
+        <Outlet />
+      </motion.div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gray-950 overflow-hidden">

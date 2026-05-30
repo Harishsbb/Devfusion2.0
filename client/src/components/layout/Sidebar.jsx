@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, FolderKanban, Zap, Code2, FileText, BarChart3,
   Settings, ChevronLeft, ChevronRight, Plus, Bell, Users, Sparkles,
-  LogOut, ChevronDown,
+  LogOut, ChevronDown, Video,
 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import useWorkspaceStore from '../../store/workspaceStore';
@@ -63,6 +63,7 @@ export default function Sidebar({ notificationCount = 0 }) {
   const navItems = wid ? [
     { to: `/dashboard`, icon: LayoutDashboard, label: 'Dashboard' },
     { to: `/workspace/${wid}`, icon: FolderKanban, label: 'Projects' },
+    { to: `/workspace/${wid}/meetings`, icon: Video, label: 'Meetings' },
     { to: `/workspace/${wid}/analytics`, icon: BarChart3, label: 'Analytics' },
     { to: `/workspace/${wid}/snippets`, icon: Code2, label: 'Snippets' },
     { to: `/workspace/${wid}/ai`, icon: Sparkles, label: 'AI Assistant' },
