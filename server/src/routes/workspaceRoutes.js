@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   createWorkspace, getWorkspaces, getWorkspace, updateWorkspace,
   inviteMember, removeMember, getWorkspaceStats,
+  acceptWorkspaceInvite, rejectWorkspaceInvite,
 } = require('../controllers/workspaceController');
 const { protect } = require('../middleware/auth');
 
@@ -11,6 +12,8 @@ router.route('/').get(getWorkspaces).post(createWorkspace);
 router.route('/:id').get(getWorkspace).put(updateWorkspace);
 router.get('/:id/stats', getWorkspaceStats);
 router.post('/:id/invite', inviteMember);
+router.post('/:id/accept', acceptWorkspaceInvite);
+router.post('/:id/reject', rejectWorkspaceInvite);
 router.delete('/:id/members/:userId', removeMember);
 
 module.exports = router;

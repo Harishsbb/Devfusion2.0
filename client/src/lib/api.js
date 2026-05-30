@@ -43,6 +43,8 @@ export const workspaceAPI = {
   getStats: (id) => api.get(`/workspaces/${id}/stats`),
   inviteMember: (id, data) => api.post(`/workspaces/${id}/invite`, data),
   removeMember: (id, userId) => api.delete(`/workspaces/${id}/members/${userId}`),
+  acceptInvite: (id) => api.post(`/workspaces/${id}/accept`),
+  rejectInvite: (id) => api.post(`/workspaces/${id}/reject`),
 };
 
 export const projectAPI = {

@@ -3,7 +3,9 @@ import { applyTheme } from '../../lib/theme';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Search, Sun, Moon, Plus, X, Check } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
-import { notificationAPI } from '../../lib/api';
+import useWorkspaceStore from '../../store/workspaceStore';
+import { notificationAPI, workspaceAPI } from '../../lib/api';
+import toast from 'react-hot-toast';
 import Avatar from '../ui/Avatar';
 import { timeAgo } from '../../lib/utils';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +22,7 @@ const notifIcons = {
 
 export default function Header({ title, subtitle }) {
   const { user } = useAuthStore();
+  const { fetchWorkspaces } = useWorkspaceStore();
   const [theme, setTheme] = useState(() => localStorage.getItem('devcollab_theme') || 'dark');
   const [showNotifs, setShowNotifs] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -73,6 +76,32 @@ export default function Header({ title, subtitle }) {
       setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (_) {}
+  };
+
+  const handleAcceptInvite = async (e, notification) => {
+    e.stopPropagation();
+    try {
+      await workspaceAPI.acceptInvite(notification.metadata.workspaceId);
+      toast.success('Workspace invitation accepted!');
+      await handleMarkRead(notification._id);
+      await loadNotifications();
+      await fetchWorkspaces();
+    } catch (error) {
+      toast.error(error.message || 'Failed to accept invitation');
+    }
+  };
+
+  const handleRejectInvite = async (e, notification) => {
+    e.stopPropagation();
+    try {
+      await workspaceAPI.rejectInvite(notification.metadata.workspaceId);
+      toast.success('Workspace invitation rejected');
+      await handleMarkRead(notification._id);
+      await loadNotifications();
+      await fetchWorkspaces();
+    } catch (error) {
+      toast.error(error.message || 'Failed to reject invitation');
+    }
   };
 
   const toggleTheme = () => {
@@ -156,15 +185,33 @@ export default function Header({ title, subtitle }) {
                       <div
                         key={n._id}
                         onClick={() => handleMarkRead(n._id)}
-                        className={`flex items-start gap-3 px-4 py-3 hover:bg-white/5 cursor-pointer transition-colors border-b border-white/5 last:border-0 ${!n.isRead ? 'bg-indigo-500/5' : ''}`}
+                        className={`flex flex-col gap-2 px-4 py-3 hover:bg-white/5 cursor-pointer transition-colors border-b border-white/5 last:border-0 ${!n.isRead ? 'bg-indigo-500/5' : ''}`}
                       >
-                        <span className="text-lg flex-shrink-0">{notifIcons[n.type] || '🔔'}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-medium ${!n.isRead ? 'text-white' : 'text-gray-300'}`}>{n.title}</p>
-                          <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{n.message}</p>
-                          <p className="text-xs text-gray-600 mt-1">{timeAgo(n.createdAt)}</p>
+                        <div className="flex items-start gap-3">
+                          <span className="text-lg flex-shrink-0">{notifIcons[n.type] || '🔔'}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm font-medium ${!n.isRead ? 'text-white' : 'text-gray-300'}`}>{n.title}</p>
+                            <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{n.message}</p>
+                            <p className="text-xs text-gray-600 mt-1">{timeAgo(n.createdAt)}</p>
+                          </div>
+                          {!n.isRead && <div className="w-2 h-2 rounded-full bg-indigo-400 flex-shrink-0 mt-1.5" />}
                         </div>
-                        {!n.isRead && <div className="w-2 h-2 rounded-full bg-indigo-400 flex-shrink-0 mt-1.5" />}
+                        {n.type === 'workspace_invite' && !n.isRead && (
+                          <div className="flex gap-2 pl-9 mt-1">
+                            <button
+                              onClick={(e) => handleAcceptInvite(e, n)}
+                              className="text-xs px-3 py-1 bg-indigo-500 hover:bg-indigo-600 text-white font-medium rounded-lg transition-colors"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              onClick={(e) => handleRejectInvite(e, n)}
+                              className="text-xs px-3 py-1 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 rounded-lg transition-colors"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ))
                   )}
