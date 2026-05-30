@@ -2,13 +2,15 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Trello, FileText, Code2, Activity, Settings, ArrowLeft, CheckCircle2, Clock, Users, Zap, Plus, ExternalLink, Trash2 } from 'lucide-react';
-import { projectAPI, taskAPI } from '../lib/api';
+import { projectAPI, taskAPI, workspaceAPI } from '../lib/api';
 import useWorkspaceStore from '../store/workspaceStore';
 import Avatar, { AvatarGroup } from '../components/ui/Avatar';
 import { PriorityBadge, StatusBadge } from '../components/ui/Badge';
 import { formatDate, timeAgo, statusConfig } from '../lib/utils';
 import { DashboardSkeleton } from '../components/ui/Skeleton';
 import { joinProject } from '../lib/socket';
+import Modal from '../components/ui/Modal';
+import toast from 'react-hot-toast';
 
 const tabs = [
   { id: 'overview', label: 'Overview', icon: Activity },
@@ -21,20 +23,25 @@ export default function ProjectPage() {
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
+  const [workspace, setWorkspace] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [showManageMembers, setShowManageMembers] = useState(false);
   
   const deleteProjectStore = useWorkspaceStore(state => state.deleteProject);
+  const updateProjectStore = useWorkspaceStore(state => state.updateProject);
 
   useEffect(() => {
     const init = async () => {
       try {
-        const [pData, tData] = await Promise.all([
+        const [pData, tData, wsData] = await Promise.all([
           projectAPI.get(workspaceId, projectId),
           taskAPI.getAll(workspaceId, projectId),
+          workspaceAPI.get(workspaceId),
         ]);
         setProject(pData.project);
         setTasks(tData.tasks);
+        setWorkspace(wsData.workspace);
         joinProject(projectId);
       } finally {
         setIsLoading(false);
@@ -42,6 +49,26 @@ export default function ProjectPage() {
     };
     init();
   }, [workspaceId, projectId]);
+
+  const handleToggleMember = async (userId) => {
+    try {
+      const isCurrentlyMember = project.members?.some(m => m.user._id === userId);
+      let updatedMembers;
+      if (isCurrentlyMember) {
+        updatedMembers = project.members.filter(m => m.user._id !== userId).map(m => ({ user: m.user._id, role: m.role }));
+      } else {
+        updatedMembers = [
+          ...(project.members || []).map(m => ({ user: m.user._id, role: m.role })),
+          { user: userId, role: 'developer' }
+        ];
+      }
+      const updated = await updateProjectStore(workspaceId, projectId, { members: updatedMembers });
+      setProject(updated);
+      toast.success(isCurrentlyMember ? 'Member removed from project' : 'Member added to project');
+    } catch (error) {
+      toast.error(error.message || 'Failed to update project members');
+    }
+  };
 
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to permanently delete this project and all of its tasks? This action cannot be undone.")) {
@@ -151,7 +178,12 @@ export default function ProjectPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Team */}
         <motion.div className="glass-dark rounded-2xl p-5 border border-white/[0.06]" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
-          <h3 className="font-semibold text-white mb-4">Team</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-white">Team</h3>
+            <button onClick={() => setShowManageMembers(true)} className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-semibold px-2 py-1 rounded bg-white/5 hover:bg-white/10 transition-all border border-white/5">
+              Manage
+            </button>
+          </div>
           <div className="space-y-3">
             {project.members?.map(m => (
               <div key={m.user._id} className="flex items-center gap-3">
@@ -201,6 +233,58 @@ export default function ProjectPage() {
           )}
         </motion.div>
       </div>
+
+      {/* Manage Members Modal */}
+      <Modal isOpen={showManageMembers} onClose={() => setShowManageMembers(false)} title="Manage Project Team" size="md">
+        <div className="space-y-4">
+          <p className="text-xs text-gray-500">
+            Select members from the workspace to assign them to this project.
+          </p>
+          <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+            {workspace?.members?.map(wsMember => {
+              const projectMember = project.members?.find(m => m.user._id === wsMember.user._id);
+              const isAssigned = !!projectMember;
+              
+              return (
+                <div key={wsMember.user._id} className="flex items-center justify-between p-2.5 glass rounded-xl border border-white/5">
+                  <div className="flex items-center gap-2.5">
+                    <Avatar user={wsMember.user} size="sm" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-200">{wsMember.user.name}</p>
+                      <p className="text-xs text-gray-500">{wsMember.user.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {isAssigned ? (
+                      <>
+                        <span className="text-xs px-2 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20">Assigned</span>
+                        {project.owner?._id !== wsMember.user._id && (
+                          <button
+                            onClick={() => handleToggleMember(wsMember.user._id)}
+                            className="text-xs px-2 py-1 rounded bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-colors"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => handleToggleMember(wsMember.user._id)}
+                        className="text-xs px-3 py-1 rounded bg-indigo-500 hover:bg-indigo-600 text-white transition-colors"
+                      >
+                        Add
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="pt-2">
+            <button onClick={() => setShowManageMembers(false)} className="btn-secondary w-full">Done</button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

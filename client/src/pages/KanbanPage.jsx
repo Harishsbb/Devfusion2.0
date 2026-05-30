@@ -212,6 +212,19 @@ export default function KanbanPage() {
     }
   };
 
+  const handleUpdateAssignee = async (userId) => {
+    if (!selectedTask) return;
+    try {
+      const targetUserId = userId || null;
+      const data = await taskAPI.update(workspaceId, projectId, selectedTask._id, { assignee: targetUserId });
+      setSelectedTask(prev => ({ ...prev, assignee: data.task.assignee }));
+      setTasks(prev => prev.map(t => t._id === selectedTask._id ? { ...t, assignee: data.task.assignee } : t));
+      toast.success('Assignee updated!');
+    } catch (error) {
+      toast.error(error.message || 'Failed to update assignee');
+    }
+  };
+
   const handleAddComment = async () => {
     if (!newComment.trim() || !selectedTask) return;
     try {
@@ -307,6 +320,15 @@ export default function KanbanPage() {
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1.5">Description</label>
             <textarea value={taskForm.description} onChange={e => setTaskForm(p => ({ ...p, description: e.target.value }))} placeholder="Task details..." rows={3} className="input-field resize-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1.5">Assignee</label>
+            <select value={taskForm.assignee} onChange={e => setTaskForm(p => ({ ...p, assignee: e.target.value }))} className="input-field">
+              <option value="">Unassigned</option>
+              {project?.members?.map(m => (
+                <option key={m.user._id} value={m.user._id}>{m.user.name}</option>
+              ))}
+            </select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -405,12 +427,16 @@ export default function KanbanPage() {
               <div className="p-5 space-y-4">
                 <div>
                   <p className="text-xs text-gray-500 mb-2">Assignee</p>
-                  {selectedTask.assignee ? (
-                    <div className="flex items-center gap-2">
-                      <Avatar user={selectedTask.assignee} size="xs" />
-                      <span className="text-sm text-gray-300">{selectedTask.assignee.name}</span>
-                    </div>
-                  ) : <span className="text-sm text-gray-600">Unassigned</span>}
+                  <select 
+                    value={selectedTask.assignee?._id || ''} 
+                    onChange={e => handleUpdateAssignee(e.target.value)}
+                    className="w-full bg-gray-850 border border-gray-700/50 rounded-lg px-2.5 py-1.5 text-sm text-gray-100 focus:outline-none focus:border-indigo-500"
+                  >
+                    <option value="">Unassigned</option>
+                    {project?.members?.map(m => (
+                      <option key={m.user._id} value={m.user._id}>{m.user.name}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-2">Reporter</p>
