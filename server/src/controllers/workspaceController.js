@@ -21,7 +21,10 @@ exports.getWorkspaces = async (req, res, next) => {
   try {
     const workspaces = await Workspace.find({ 
       members: { 
-        $elemMatch: { user: req.user._id, status: 'active' } 
+        $elemMatch: { 
+          user: req.user._id, 
+          status: { $ne: 'pending' } 
+        } 
       } 
     })
       .populate('owner', 'name email avatar')
@@ -41,7 +44,7 @@ exports.getWorkspace = async (req, res, next) => {
     if (!workspace) {
       return res.status(404).json({ success: false, message: 'Workspace not found' });
     }
-    const isMember = workspace.members.some(m => m.user._id.toString() === req.user._id.toString() && m.status === 'active');
+    const isMember = workspace.members.some(m => m.user._id.toString() === req.user._id.toString() && m.status !== 'pending');
     if (!isMember) {
       return res.status(403).json({ success: false, message: 'Not a member of this workspace' });
     }

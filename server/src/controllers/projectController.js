@@ -60,6 +60,10 @@ exports.updateProject = async (req, res, next) => {
     const oldProject = await Project.findById(req.params.id);
     if (!oldProject) return res.status(404).json({ success: false, message: 'Project not found' });
 
+    if (oldProject.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized: Only the project creator can manage team members or update the project.' });
+    }
+
     const project = await Project.findByIdAndUpdate(req.params.id, req.body, { new: true })
       .populate('owner', 'name email avatar')
       .populate('members.user', 'name email avatar');
@@ -110,6 +114,9 @@ exports.deleteProject = async (req, res, next) => {
   try {
     const project = await Project.findById(req.params.id);
     if (!project) return res.status(404).json({ success: false, message: 'Project not found' });
+    if (project.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized: Only the project creator can delete this project.' });
+    }
     await Task.deleteMany({ project: project._id });
     await project.deleteOne();
     res.json({ success: true, message: 'Project deleted' });

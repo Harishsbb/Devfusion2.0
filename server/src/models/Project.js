@@ -7,7 +7,7 @@ const projectSchema = new mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   members: [{
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    role: { type: String, enum: ['lead', 'developer', 'viewer'], default: 'developer' },
+    role: { type: String, enum: ['lead', 'developer', 'designer', 'tester', 'admin', 'viewer'], default: 'developer' },
   }],
   status: { type: String, enum: ['active', 'paused', 'completed', 'archived'], default: 'active' },
   priority: { type: String, enum: ['low', 'medium', 'high', 'critical'], default: 'medium' },

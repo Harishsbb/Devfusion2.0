@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Trello, FileText, Code2, Activity, Settings, ArrowLeft, CheckCircle2, Clock, Users, Zap, Plus, ExternalLink, Trash2 } from 'lucide-react';
 import { projectAPI, taskAPI, workspaceAPI } from '../lib/api';
 import useWorkspaceStore from '../store/workspaceStore';
+import useAuthStore from '../store/authStore';
 import Avatar, { AvatarGroup } from '../components/ui/Avatar';
 import { PriorityBadge, StatusBadge } from '../components/ui/Badge';
 import { formatDate, timeAgo, statusConfig } from '../lib/utils';
@@ -21,6 +22,7 @@ const tabs = [
 export default function ProjectPage() {
   const { workspaceId, projectId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [workspace, setWorkspace] = useState(null);
@@ -30,6 +32,8 @@ export default function ProjectPage() {
   
   const deleteProjectStore = useWorkspaceStore(state => state.deleteProject);
   const updateProjectStore = useWorkspaceStore(state => state.updateProject);
+
+  const isOwner = project?.owner?._id === user?._id || project?.owner === user?._id;
 
   useEffect(() => {
     const init = async () => {
@@ -67,6 +71,22 @@ export default function ProjectPage() {
       toast.success(isCurrentlyMember ? 'Member removed from project' : 'Member added to project');
     } catch (error) {
       toast.error(error.message || 'Failed to update project members');
+    }
+  };
+
+  const handleChangeRole = async (userId, newRole) => {
+    try {
+      const updatedMembers = (project.members || []).map(m => {
+        if (m.user._id === userId) {
+          return { user: m.user._id, role: newRole };
+        }
+        return { user: m.user._id, role: m.role };
+      });
+      const updated = await updateProjectStore(workspaceId, projectId, { members: updatedMembers });
+      setProject(updated);
+      toast.success('Role updated successfully');
+    } catch (error) {
+      toast.error(error.message || 'Failed to update member role');
     }
   };
 
@@ -124,9 +144,11 @@ export default function ProjectPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button onClick={handleDelete} className="px-4 py-2 border border-red-500/30 hover:border-red-500/50 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 font-medium rounded-xl text-sm transition-all flex items-center gap-2">
-              <Trash2 size={15} /> Delete Project
-            </button>
+            {isOwner && (
+              <button onClick={handleDelete} className="px-4 py-2 border border-red-500/30 hover:border-red-500/50 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 font-medium rounded-xl text-sm transition-all flex items-center gap-2">
+                <Trash2 size={15} /> Delete Project
+              </button>
+            )}
             <Link to={`/workspace/${workspaceId}/project/${projectId}/board`} className="btn-primary flex items-center gap-2 text-sm">
               <Trello size={15} /> Open Board
             </Link>
@@ -180,9 +202,11 @@ export default function ProjectPage() {
         <motion.div className="glass-dark rounded-2xl p-5 border border-white/[0.06]" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-white">Team</h3>
-            <button onClick={() => setShowManageMembers(true)} className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-semibold px-2 py-1 rounded bg-white/5 hover:bg-white/10 transition-all border border-white/5">
-              Manage
-            </button>
+            {isOwner && (
+              <button onClick={() => setShowManageMembers(true)} className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-semibold px-2 py-1 rounded bg-white/5 hover:bg-white/10 transition-all border border-white/5">
+                Manage
+              </button>
+            )}
           </div>
           <div className="space-y-3">
             {project.members?.map(m => (
@@ -257,7 +281,22 @@ export default function ProjectPage() {
                   <div className="flex items-center gap-2">
                     {isAssigned ? (
                       <>
-                        <span className="text-xs px-2 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20">Assigned</span>
+                        {project.owner?._id !== wsMember.user._id ? (
+                          <select
+                            value={projectMember.role}
+                            onChange={(e) => handleChangeRole(wsMember.user._id, e.target.value)}
+                            className="text-xs bg-gray-900 border border-white/10 rounded px-2 py-1 text-gray-300 focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
+                          >
+                            <option value="lead">Lead</option>
+                            <option value="developer">Developer</option>
+                            <option value="designer">Designer</option>
+                            <option value="tester">Tester</option>
+                            <option value="admin">Admin</option>
+                            <option value="viewer">Viewer</option>
+                          </select>
+                        ) : (
+                          <span className="text-xs px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Owner</span>
+                        )}
                         {project.owner?._id !== wsMember.user._id && (
                           <button
                             onClick={() => handleToggleMember(wsMember.user._id)}
