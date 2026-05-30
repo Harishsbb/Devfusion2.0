@@ -29,14 +29,27 @@ exports.createTask = async (req, res, next) => {
     const task = await Task.create(taskData);
     await task.populate(['assignee', 'reporter'].map(f => ({ path: f, select: 'name email avatar' })));
     if (task.assignee && task.assignee.toString() !== req.user._id.toString()) {
-      await Notification.create({
-        recipient: task.assignee,
+      const notification = await Notification.create({
+        recipient: task.assignee._id || task.assignee,
         sender: req.user._id,
         type: 'task_assigned',
         title: 'New task assigned',
         message: `${req.user.name} assigned you "${title}"`,
         link: `/projects/${project._id}/tasks/${task._id}`,
       });
+
+      // Emit real-time notification
+      const io = req.app.get('io');
+      if (io) {
+        io.to(`user:${(task.assignee._id || task.assignee).toString()}`).emit('notification:new', {
+          ...notification.toObject(),
+          sender: {
+            _id: req.user._id,
+            name: req.user.name,
+            avatar: req.user.avatar,
+          }
+        });
+      }
     }
     await Project.findByIdAndUpdate(project._id, { $inc: { taskCount: 1 } });
     res.status(201).json({ success: true, task });

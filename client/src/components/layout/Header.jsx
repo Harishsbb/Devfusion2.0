@@ -5,6 +5,7 @@ import { Bell, Search, Sun, Moon, Plus, X, Check } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import useWorkspaceStore from '../../store/workspaceStore';
 import { notificationAPI, workspaceAPI } from '../../lib/api';
+import { getSocket } from '../../lib/socket';
 import toast from 'react-hot-toast';
 import Avatar from '../ui/Avatar';
 import { timeAgo } from '../../lib/utils';
@@ -33,6 +34,16 @@ export default function Header({ title, subtitle }) {
 
   useEffect(() => {
     loadNotifications();
+  }, []);
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+    const handleNotif = () => {
+      loadNotifications();
+    };
+    socket.on('notification:new', handleNotif);
+    return () => socket.off('notification:new', handleNotif);
   }, []);
 
   useEffect(() => {
@@ -145,7 +156,10 @@ export default function Header({ title, subtitle }) {
         {/* Notifications */}
         <div ref={notifRef} className="relative">
           <button
-            onClick={() => setShowNotifs(!showNotifs)}
+            onClick={() => {
+              if (!showNotifs) loadNotifications();
+              setShowNotifs(!showNotifs);
+            }}
             className="relative w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-all"
           >
             <Bell size={16} />

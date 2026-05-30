@@ -83,7 +83,7 @@ exports.inviteMember = async (req, res, next) => {
 
     // Create notification
     const Notification = require('../models/Notification');
-    await Notification.create({
+    const notification = await Notification.create({
       recipient: invitedUser._id,
       sender: req.user._id,
       type: 'workspace_invite',
@@ -92,6 +92,19 @@ exports.inviteMember = async (req, res, next) => {
       link: `/dashboard`,
       metadata: { workspaceId: workspace._id },
     });
+
+    // Emit real-time notification
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`user:${invitedUser._id.toString()}`).emit('notification:new', {
+        ...notification.toObject(),
+        sender: {
+          _id: req.user._id,
+          name: req.user.name,
+          avatar: req.user.avatar,
+        }
+      });
+    }
 
     await workspace.populate('members.user', 'name email avatar');
     res.json({ success: true, workspace, message: `Invitation sent to ${invitedUser.name}` });
