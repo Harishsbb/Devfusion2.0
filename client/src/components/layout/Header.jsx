@@ -18,6 +18,7 @@ const notifIcons = {
   mention: '@',
   task_moved: '🔀',
   workspace_invite: '🤝',
+  project_invite: '📁',
   ai_suggestion: '🤖',
 };
 

@@ -57,10 +57,49 @@ exports.getProject = async (req, res, next) => {
 
 exports.updateProject = async (req, res, next) => {
   try {
+    const oldProject = await Project.findById(req.params.id);
+    if (!oldProject) return res.status(404).json({ success: false, message: 'Project not found' });
+
     const project = await Project.findByIdAndUpdate(req.params.id, req.body, { new: true })
       .populate('owner', 'name email avatar')
       .populate('members.user', 'name email avatar');
     if (!project) return res.status(404).json({ success: false, message: 'Project not found' });
+
+    // Handle project membership change notifications
+    if (req.body.members) {
+      const oldUserIds = (oldProject.members || []).map(m => m.user.toString());
+      const newUserIds = (req.body.members || []).map(m => m.user.toString());
+      const addedUserIds = newUserIds.filter(id => !oldUserIds.includes(id) && id !== req.user._id.toString());
+
+      if (addedUserIds.length > 0) {
+        const Notification = require('../models/Notification');
+        const io = req.app.get('io');
+
+        await Promise.all(addedUserIds.map(async (userId) => {
+          const notification = await Notification.create({
+            recipient: userId,
+            sender: req.user._id,
+            type: 'project_invite',
+            title: 'Project Assignment',
+            message: `${req.user.name} added you to the project "${project.name}"`,
+            link: `/workspace/${project.workspace}/project/${project._id}`,
+            metadata: { projectId: project._id, workspaceId: project.workspace },
+          });
+
+          if (io) {
+            io.to(`user:${userId}`).emit('notification:new', {
+              ...notification.toObject(),
+              sender: {
+                _id: req.user._id,
+                name: req.user.name,
+                avatar: req.user.avatar,
+              }
+            });
+          }
+        }));
+      }
+    }
+
     res.json({ success: true, project });
   } catch (error) {
     next(error);
